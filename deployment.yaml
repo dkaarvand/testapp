@@ -1,46 +1,37 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: testapp
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: testapp
-  template:
-    metadata:
-      labels:
-        app: testapp
-    spec:
-      containers:
-        - name: testapp
-          image: ghcr.io/dkaarvand/testapp:latest
-          ports:
-            - containerPort: 8000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: testapp
-spec:
-  selector:
-    app: testapp
-  ports:
-    - port: 80
-      targetPort: 8000
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: testapp
-spec:
-  rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: testapp
-                port:
-                  number: 80
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: |
+            ghcr.io/dkaarvand/testapp:latest
+            ghcr.io/dkaarvand/testapp:${{ github.sha }}
+
+      - name: Update deployment.yaml with new image tag
+        run: |
+          sed -i "s|ghcr.io/dkaarvand/testapp:.*|ghcr.io/dkaarvand/testapp:${{ github.sha }}|" deployment.yaml
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add deployment.yaml
+          git commit -m "CI: update image tag to ${{ github.sha }}"
+          git push
