@@ -23,4 +23,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ghcr.io/dkaarvand/testapp:latest
+          tags: |
+            ghcr.io/dkaarvand/testapp:latest
+            ghcr.io/dkaarvand/testapp:${{ github.sha }}
