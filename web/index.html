@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testapp</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f4f8;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px 60px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h1 { margin: 0 0 8px; font-size: 24px; color: #1a1a2e; }
+        p  { color: #666; margin: 0 0 32px; }
+        button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { background: #4338ca; }
+        .result {
+            margin-top: 24px;
+            font-size: 18px;
+            color: #1a1a2e;
+            min-height: 28px;
+        }
+        .visits {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🐳 Testapp</h1>
+        <p>A tiny app to test the Docker pipeline</p>
+        <button onclick="ping()">Ping the Python backend</button>
+        <div class="result" id="result"></div>
+        <div class="visits" id="visits"></div>
+    </div>
+
+    <script>
+        async function ping() {
+            const res = await fetch('/ping');
+            const data = await res.json();
+            document.getElementById('result').textContent = data.message;
+            document.getElementById('visits').textContent = `Button clicked ${data.visits} time(s)`;
+        }
+    </script>
+</body>
+</html>
