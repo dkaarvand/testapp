@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: testapp-dev
-          image: ghcr.io/dkaarvand/testapp:latest
+          image: ghcr.io/dkaarvand/testapp:c0109a6084fba055d56686b20087cf6af74540d1
           ports:
             - containerPort: 8000
 ---
