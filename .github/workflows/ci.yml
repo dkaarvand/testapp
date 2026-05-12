@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
 
 jobs:
   build:
@@ -27,11 +27,20 @@ jobs:
             ghcr.io/dkaarvand/testapp:latest
             ghcr.io/dkaarvand/testapp:${{ github.sha }}
 
-      - name: Update deployment.yaml with new image tag
+      - name: Update config repo with new image tag
         run: |
-          sed -i "s|ghcr.io/dkaarvand/testapp:.*|ghcr.io/dkaarvand/testapp:${{ github.sha }}|" deployment.yaml
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/dkaarvand/testapp-config.git
+          cd testapp-config
+
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            sed -i "s|ghcr.io/dkaarvand/testapp:.*|ghcr.io/dkaarvand/testapp:${{ github.sha }}|" production/deployment.yaml
+            git add production/deployment.yaml
+          else
+            sed -i "s|ghcr.io/dkaarvand/testapp:.*|ghcr.io/dkaarvand/testapp:${{ github.sha }}|" dev/deployment.yaml
+            git add dev/deployment.yaml
+          fi
+
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add deployment.yaml
           git commit -m "CI: update image tag to ${{ github.sha }}"
           git push
